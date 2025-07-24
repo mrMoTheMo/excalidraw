@@ -1,0 +1,43 @@
+name: Sync Fork Weekly
+
+on:
+  schedule:
+    # This runs the job at 08:00 UTC every Monday.
+    # You can customize the cron schedule.
+    - cron:  '0 8 * * 1'
+  workflow_dispatch:
+    # This adds a button to run the workflow manually from the Actions tab.
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          # We need to fetch the whole history to merge correctly.
+          fetch-depth: 0
+          # This token is provided by GitHub automatically and allows pushing back to your repo.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name 'GitHub Actions Bot'
+          git config user.email 'actions-bot@github.com'
+
+      - name: Sync master branch with upstream
+        run: |
+          # Add the original repository as a remote named "upstream"
+          git remote add upstream https://github.com/excalidraw/excalidraw.git
+          
+          # Fetch the latest changes from upstream
+          git fetch upstream
+          
+          # Checkout your local master branch
+          git checkout master
+          
+          # Merge the changes from the original repository's master branch
+          git merge upstream/master
+          
+          # Push the updated master branch back to your fork on GitHub (origin)
+          git push origin master
