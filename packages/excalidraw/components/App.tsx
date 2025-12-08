@@ -11463,7 +11463,11 @@ class App extends React.Component<AppProps, AppState> {
   ): void => {
     const selectionElement = this.state.selectionElement;
     const pointerCoords = pointerDownState.lastCoords;
-    if (selectionElement && this.state.activeTool.type !== "eraser") {
+    if (
+      selectionElement &&
+      pointerDownState.boxSelection.hasOccurred &&
+      this.state.activeTool.type !== "eraser"
+    ) {
       dragNewElement({
         newElement: selectionElement,
         elementType: this.state.activeTool.type,
@@ -11527,25 +11531,27 @@ class App extends React.Component<AppProps, AppState> {
       snapLines,
     });
 
-    dragNewElement({
-      newElement,
-      elementType: this.state.activeTool.type,
-      originX: pointerDownState.originInGrid.x,
-      originY: pointerDownState.originInGrid.y,
-      x: gridX,
-      y: gridY,
-      width: distance(pointerDownState.originInGrid.x, gridX),
-      height: distance(pointerDownState.originInGrid.y, gridY),
-      shouldMaintainAspectRatio: isImageElement(newElement)
-        ? !shouldMaintainAspectRatio(event)
-        : shouldMaintainAspectRatio(event),
-      shouldResizeFromCenter: shouldResizeFromCenter(event),
-      zoom: this.state.zoom.value,
-      scene: this.scene,
-      widthAspectRatio: aspectRatio,
-      originOffset: this.state.originSnapOffset,
-      informMutation,
-    });
+    if (!isBindingElement(newElement)) {
+      dragNewElement({
+        newElement,
+        elementType: this.state.activeTool.type,
+        originX: pointerDownState.originInGrid.x,
+        originY: pointerDownState.originInGrid.y,
+        x: gridX,
+        y: gridY,
+        width: distance(pointerDownState.originInGrid.x, gridX),
+        height: distance(pointerDownState.originInGrid.y, gridY),
+        shouldMaintainAspectRatio: isImageElement(newElement)
+          ? !shouldMaintainAspectRatio(event)
+          : shouldMaintainAspectRatio(event),
+        shouldResizeFromCenter: shouldResizeFromCenter(event),
+        zoom: this.state.zoom.value,
+        scene: this.scene,
+        widthAspectRatio: aspectRatio,
+        originOffset: this.state.originSnapOffset,
+        informMutation,
+      });
+    }
 
     this.setState({
       newElement,
